@@ -1,0 +1,99 @@
+---
+- name: Upgrade CISCO SWITCH IOS
+  hosts: switches
+  connection: network_cli
+
+  vars:
+    upgrade_ios_version: 15.2(20170321:233949)
+  
+  tasks:
+    - name: check current version
+      ios_facts:
+    
+    - debug:
+        msg:
+        - "Current version is {{ ansible_net_version }}"
+        - "Upgrade image is 15.2(20170321:233949)"
+    
+    - debug:
+        msg:
+        - "Image is not compliant and will be upgraded"
+      
+      when: ansible_net_version != upgrade_ios_version
+
+- name: UPGRADE CISCO ROUTER IOS
+  hosts: routers
+  connection: network_cli
+
+  vars: 
+    upgrade_ios_version: 15.6(2)T
+
+  tasks:
+    - name: check current ios version
+      ios_facts:
+
+    - debug:
+        msg: 
+        - "Current version is 15.6(2)T"
+        - "Upgrade image is 15.6(2)T"
+
+    - debug:
+        msg:
+        - "Current image is not compliant and will be upgraded"
+      
+      when: ansible_net_version != upgrade_ios_version
+
+
+    - name: Copy Image // This could take a while
+      net_put:
+        src: ~/thenewpython/newnautobot/vios-adventerprisek9-m.vmdk.SPA.156-2.T.qcow2
+        protocol: scp
+        dest: 'flash2:/vios-adventerprisek9-m.vmdk.SPA.156-2.T.qcow2'
+      vars: 
+        ansible_command_timeout: 600
+
+    - name: Chnage boot variable to new image
+      ios_config: 
+        commands: 
+          - "boot system flash:vios-adventerprisek9-m.vmdk.SPA.156-2.T.qcow2"
+        save_when: always
+
+    - name: Reload the device
+      cli_command:
+        command: reload
+        prompt: 
+          - confirm
+        answer: 
+          - 'y'
+
+    - name: Wait for device to come back online
+      wait_for: 
+        host: "{{ inventory_hostname }}"
+        port: 22
+        delay: 90
+      delegate_to: localhost
+
+    - name: Check image version
+      ios_facts:
+
+    - debug:
+      msg:
+      - "Current version is {{ ansible_net_version }}"
+
+    - name: Show that IOS version is correct
+
+      vars:
+        upgrade_ios_version: 15.6(2)T
+      
+      assert:
+        that:
+          - upgrade_ios_version == ansible_net_version
+    - debug:
+      msg:
+      - "Software Upgrade has been completed"
+
+
+
+
+
+

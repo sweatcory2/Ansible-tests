@@ -1,0 +1,54 @@
+{
+    "_meta": {
+        "hostvars": {
+            "CORY-BLACK-ROUTER": {
+                "ansible_host": "172.16.1.178",
+                "device_type": "router"
+            },
+            "CORY-BLACK-SWITCH": {
+                "ansible_host": "172.16.1.179",
+                "device_type": "switch"
+            },
+            "CORY-GREY-ROUTER": {
+                "ansible_host": "172.16.1.175",
+                "device_type": "router"
+            },
+            "CORY-GREY-SWITCH": {
+                "ansible_host": "172.16.1.181",
+                "device_type": "switch"
+            }
+        }
+    },
+    "all": {
+        "children": [
+            "grey_devices",
+            "black_devices",
+            "routers",
+            "switches"
+        ]
+    },
+    "grey_devices": {
+        "hosts": [
+            "CORY-GREY-ROUTER",
+            "CORY-GREY-SWITCH"
+        ]
+    },
+    "black_devices": {
+        "hosts": [
+            "CORY-BLACK-ROUTER",
+            "CORY-BLACK-SWITCH"
+        ]
+    },
+    "routers": {
+        "hosts": [
+            "CORY-BLACK-ROUTER",
+            "CORY-GREY-ROUTER"
+        ]
+    },
+    "switches": {
+        "hosts": [
+            "CORY-BLACK-SWITCH",
+            "CORY-GREY-SWITCH"
+        ]
+    }
+}
